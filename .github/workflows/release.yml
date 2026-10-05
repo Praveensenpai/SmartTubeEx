@@ -55,13 +55,18 @@ jobs:
             exit 1
           fi
           echo "Using apksigner: $APKSIGNER"
-          EXPECTED="C0:79:17:BE:E9:D6:FE:0E:B3:CF:02:5E:E5:43:3A:FD:44:7B:64:77:8F:2B:3E:68:3A:32:1B:3B:C7:02:E3:5E"
+          # apksigner prints lowercase hex without colons; normalize both sides.
+          EXPECTED="c07917bee9d6fe0eb3cf025ee5433afd447b64778f2b3e683a321b3bc702e35e"
           for apk in smarttubetv/build/outputs/apk/ststable/release/*.apk; do
             echo "== $(basename "$apk") =="
             CERTS=$("$APKSIGNER" verify --print-certs "$apk")
             echo "$CERTS" | grep -E 'Signer #1 certificate (DN|SHA-256)' || true
-            echo "$CERTS" | grep -F "$EXPECTED" >/dev/null \
-              || { echo "ERROR: $(basename "$apk") is not signed with the release key" >&2; exit 1; }
+            GOT=$(echo "$CERTS" | grep -i 'SHA-256 digest' | head -1 \
+              | sed -E 's/.*digest:[[:space:]]*//' | tr -d ':' | tr 'A-F' 'a-f')
+            if [ "$GOT" != "$EXPECTED" ]; then
+              echo "ERROR: $(basename "$apk") signed with $GOT, expected $EXPECTED" >&2
+              exit 1
+            fi
           done
           echo "All APKs verified against release key $EXPECTED"
 
