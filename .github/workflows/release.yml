@@ -1,0 +1,65 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    name: Build & Publish Signed Stable APKs
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          submodules: recursive
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5.2.0
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'gradle'
+
+      - name: Configure Build Signing
+        run: |
+          echo "storePassword=${{ secrets.KEY_STORE_PASSWORD }}" > keystore.properties
+          echo "keyAlias=${{ secrets.ALIAS }}" >> keystore.properties
+          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> keystore.properties
+          echo "storeFile=${{ github.workspace }}/key.jks" >> keystore.properties
+          echo "${{ secrets.SIGNING_KEY }}" | base64 --decode > ${{ github.workspace }}/key.jks
+
+      - name: Grant Gradle permissions
+        run: chmod +x gradlew
+
+      - name: Build Signed Stable Release
+        run: ./gradlew clean assembleStstableRelease
+
+      - name: Generate Checksums
+        run: |
+          cd smarttubetv/build/outputs/apk/ststable/release
+          sha256sum *.apk > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      - name: Verify APK Signing
+        run: |
+          APKSIGNER=$(ls "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -1)
+          for apk in smarttubetv/build/outputs/apk/ststable/release/*.apk; do
+            echo "== $(basename "$apk") =="
+            "$APKSIGNER" verify --print-certs "$apk" | grep -E 'Signer #1 certificate (DN|SHA-256)'
+          done
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "🌸 SmartTubeEx ${{ github.ref_name }} ✨"
+          body_path: .github/RELEASE_NOTES.md
+          files: |
+            smarttubetv/build/outputs/apk/ststable/release/*.apk
+            smarttubetv/build/outputs/apk/ststable/release/SHA256SUMS.txt
+          fail_on_unmatched_files: true
