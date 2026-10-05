@@ -17,7 +17,7 @@
 <br>
 
 > [!TIP]
-> **Zero Bloat · Real-Time O(1) Title Filtering · Retains Full SmartTube Features**  
+> **Zero Bloat · Real-Time Title Filtering · Retains Full SmartTube Features**  
 > Built for Android TV and Google TV devices to keep your recommendations, searches, and subscription feeds clean and spoiler-free.
 
 ---
@@ -41,7 +41,7 @@ Download the pre-compiled APK matching your TV or streaming device architecture 
 |---|---|
 | **🚫 User Keyword Filter** | Define custom keywords or phrases to automatically hide matching video titles across Home, Search, Subscriptions, and Playlists. |
 | **🛡️ Global Channel Blacklist** | Long-press any video card to blacklist the creator. Blacklisted channels disappear instantly from search results and feeds. |
-| **⚡ Ultra-Fast Memory Engine** | O(1) hash-set lookup ensures instantaneous title inspection with zero dropped frames or UI stutter on low-powered TV chips. |
+| **⚡ Ultra-Fast Memory Engine** | In-memory keyword matching keeps title inspection fast enough for low-powered TV chips, with no network round-trips per video. |
 | **💾 Backup & Sync Support** | Blocked keywords and blacklisted channels seamlessly export and import with SmartTube's built-in backup and restore utilities. |
 | **🪄 All Native SmartTube Power** | Includes SponsorBlock, 8K/60fps/HDR support, background audio, ad-free playback, live chat, and customizable player controls. |
 
@@ -57,7 +57,7 @@ Download the pre-compiled APK matching your TV or streaming device architecture 
                             │
                             ▼
            ┌─────────────────────────────────┐
-           │   🔍 VideoFilter Engine (O(1))  │
+           │   🔍 VideoGroup Filter Gate     │
            │   · Case-insensitive regex/norm │
            │   · Checks Blocked Word Cache   │
            └────────────────┬────────────────┘

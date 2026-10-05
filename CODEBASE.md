@@ -28,7 +28,7 @@ Backup:         BackupAndRestoreManager -> Utils.BACKUP_PREFS (includes blocked_
 - **Architecture**: MVP presenters + views. `common/` holds all shared logic and presenters; `smarttubetv/` holds TV UI (activities, fragments, presenters, adapters).
 - **Hard Constraints (repo rules AGENTS.md/GEMINI.md)**: <400 LOC/file (300 soft), <60 LOC/fn (40 soft), max 5 params, max 3 nesting, zero emoji in UI, zero unverified `@Suppress` on Compose lints (project is XML/Leanback, not Compose). Kotlin used in 8 files only.
 - **Flavors**: `stbeta` (org.smarttube.beta), `ststable` (org.smarttube.stable), `stfdroid` (app.smarttube.fdroid). ApplicationId base `app.smarttube`.
-- **Submodules**: `SharedModules` and `MediaServiceCore` are git submodules and currently EMPTY on disk. Clean build requires `git submodule update --init --recursive`; `settings.gradle` applies `core_settings.gradle`/`constants.gradle` from them.
+- **Submodules**: `SharedModules` and `MediaServiceCore` are git submodules, checked out at the pinned commits recorded by the parent repo (`git submodule status`). Fresh clones require `git submodule update --init --recursive`; `settings.gradle` applies `core_settings.gradle`/`constants.gradle` from them.
 - **Target Distribution**: Android APK per-ABI (armeabi-v7a, arm64-v8a, x86, universal) via GitHub Actions CI (`assembleStbetaRelease`) + releases.
 
 ## 3. Module & Interface Skeleton
@@ -55,14 +55,6 @@ Backup:         BackupAndRestoreManager -> Utils.BACKUP_PREFS (includes blocked_
 - **Consumers**: `GeneralSettingsPresenter` (add/list/remove UI), `VideoGroup.isKeywordBlocked`.
 - **Side Effects / I/O**: reads+writes `SharedPreferences("blocked_words_prefs")`.
 
-### `common/.../filter/VideoFilter.java` (Role: domain/filter, Lines: 40)
-- **Responsibility**: Batch helper to drop keyword-blocked videos from a list.
-- **Public Signatures**:
-  ```java
-  static List<Video> filterBlocked(Context context, List<Video> videos)
-  ```
-- **Consumers**: NONE — dead code. Enforced filtering happens inline in `VideoGroup.add`.
-
 ### `common/.../prefs/BlockedChannelData.java` (Role: domain/prefs, Lines: 228)
 - **Responsibility**: Profile-scoped persistence + membership for blacklisted channels.
 - **Imports**: `AppPrefs.ProfileChangeListener`, `Helpers`, `Utils`, `android.util.Pair`, `java.util.{ArrayList,List,Map,Entry}`.
@@ -72,7 +64,7 @@ Backup:         BackupAndRestoreManager -> Utils.BACKUP_PREFS (includes blocked_
     static Channel fromString(String specs); boolean equals(Object); String toString(); }
   public interface BlockedChannelListener { void onChanged(); }
   ```
-  `Channel.equals`: if both names present compares names (`Helpers.equals`); else id branch — BUGGY, compares `Channel` object to `String` id (line ~62), id fallback never true.
+  `Channel.equals`: if both names present compares names (`Helpers.equals`); else id branch compares ids (`Helpers.equals(channelId, channel.channelId)`).
 - **State**: `List<Channel> mChannels`, key `blocked_channel_data` in `AppPrefs`. Delayed persist 10s (`Utils.postDelayed`), immediate via `persistNow()`.
 - **Public Signatures**:
   ```java
@@ -107,6 +99,7 @@ Backup:         BackupAndRestoreManager -> Utils.BACKUP_PREFS (includes blocked_
 ### `common/.../app/models/data/Video.java` (Role: domain/model, Lines: 978)
 - **Responsibility**: Video/channel/playlist/header model.
 - **Relevant signatures**: `boolean belongsToBlockedChannels()`, `String getChannelIdOrName()`, `belongsToGroup(long)`, `getTitle()`, `getAuthor()`, `sync(State)`.
+- **Autoplay filter**: `findNextVideo(MediaItemMetadata)` (remote queue) skips suggestion items whose channel is in `BlockedChannelData` when the block list is non-empty — a second `BlockedChannelData` consumer outside the `VideoGroup` gate.
 
 ### `common/.../app/presenters/settings/GeneralSettingsPresenter.java` (Role: presenter, Lines: 848)
 - **Responsibility**: General settings tree incl. keyword filter entry.
@@ -203,15 +196,15 @@ JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 ./gradlew clean assembleStbetaRelea
 
 ## 6. Known Issues / Debt
 
-- `KeywordFilterManager.isBlocked` is O(n) substring scan, not O(1) as README claims. HashSet is storage only.
-- `VideoFilter.filterBlocked` is dead code (never referenced).
-- `BlockedChannelData.Channel.equals` id-fallback branch compares `Channel` to `String` — always false; name-less blocked channels won't match by id.
+- `KeywordFilterManager.isBlocked` is an O(n) substring scan over the keyword set, not O(1); the `HashSet` is storage only. (README claims corrected.)
 - Keyword filter matches title only (not description/tags/channel).
-- No unit tests for `KeywordFilterManager` or `BlockedChannelData` (Robolectric configured in `common`).
+- No unit tests for `KeywordFilterManager` (Robolectric configured in `common`); `BlockedChannelData.Channel.equals` covered by `common/src/test/.../BlockedChannelDataChannelEqualsTest`.
 - `GeneralData.mIsOldUpdateNotificationsEnabled` (prefs index 43) is now unused after the sidebar-update removal; kept to avoid shifting positional prefs parsing.
 - `SharedModules` / `MediaServiceCore` submodules are initialized via `git submodule update --init --recursive`.
 
 ## 7. Recent Iteration Changes
+
+- **2026-10-06**: Fixed `BlockedChannelData.Channel.equals` id-fallback (`Helpers.equals(channel, channel.channelId)` -> `Helpers.equals(channelId, channel.channelId)`); name-less blocked channels now match by id. Corrected the false O(1) claim in README (3 places) — `KeywordFilterManager.isBlocked` is O(n). Removed dead `VideoFilter` class (filtering enforced in `VideoGroup.add`). Added `common/.../prefs/BlockedChannelDataChannelEqualsTest` (4 reflection-driven cases, JUnit, `testStstableDebugUnitTest` green). Verified `assembleStstableDebug` builds green. Refreshed CODEBASE.md: submodules no longer described as empty, documented `Video.findNextVideo` as a `BlockedChannelData` consumer.
 
 - **2026-10-05**: Removed sidebar "Update" entry. `AppUpdatePresenter.onUpdateFound` background path is now silent (was `pinUpdateSection` -> `BrowsePresenter.pinItem`); deleted `pinUpdateSection`, `createChangelog`, and unused imports. Collapsed the About settings 3-way notification radio (`sidebar_notification`/`dialog_notification`) to a single `check_updates_auto` switch. Manual `Check for updates` still shows the install dialog. `GeneralData.mIsOldUpdateNotificationsEnabled` left in place (positional prefs parsing) but now unused.
 - **2026-10-05**: Initial `CODEBASE.md` generated from full-repo exploration (filter engine, persistence, UI, CI, module graph).
