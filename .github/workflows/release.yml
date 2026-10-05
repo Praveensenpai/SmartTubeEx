@@ -48,11 +48,22 @@ jobs:
 
       - name: Verify APK Signing
         run: |
-          APKSIGNER=$(ls "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -1)
+          SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+          APKSIGNER=$(find "$SDK_ROOT" -type f -name apksigner 2>/dev/null | sort -V | tail -1)
+          if [ -z "$APKSIGNER" ]; then
+            echo "apksigner not found under $SDK_ROOT" >&2
+            exit 1
+          fi
+          echo "Using apksigner: $APKSIGNER"
+          EXPECTED="C0:79:17:BE:E9:D6:FE:0E:B3:CF:02:5E:E5:43:3A:FD:44:7B:64:77:8F:2B:3E:68:3A:32:1B:3B:C7:02:E3:5E"
           for apk in smarttubetv/build/outputs/apk/ststable/release/*.apk; do
             echo "== $(basename "$apk") =="
-            "$APKSIGNER" verify --print-certs "$apk" | grep -E 'Signer #1 certificate (DN|SHA-256)'
+            CERTS=$("$APKSIGNER" verify --print-certs "$apk")
+            echo "$CERTS" | grep -E 'Signer #1 certificate (DN|SHA-256)' || true
+            echo "$CERTS" | grep -F "$EXPECTED" >/dev/null \
+              || { echo "ERROR: $(basename "$apk") is not signed with the release key" >&2; exit 1; }
           done
+          echo "All APKs verified against release key $EXPECTED"
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
