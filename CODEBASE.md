@@ -135,6 +135,19 @@ Backup:         BackupAndRestoreManager -> Utils.BACKUP_PREFS (includes blocked_
   ```
 - **Section def**: line ~204 `mSectionsMapping.put(TYPE_BLOCKED_CHANNELS, new BrowseSection(..., R.drawable.icon_blocked_channels, false))`.
 
+### `common/.../app/presenters/dialogs/AppUpdatePresenter.java` (Role: presenter, Lines: 117)
+- **Responsibility**: Update check + install flow. Background checks are silent (no sidebar entry, no dialog); only an explicit force-check shows the install dialog.
+- **Public signatures**:
+  ```java
+  static AppUpdatePresenter instance(Context)
+  static void unhold()
+  void start(boolean forceCheck)
+  void onUpdateFound(String versionName, List<String> changelog, String apkPath)
+  void onUpdateError(Exception error)
+  ```
+- **Consumers**: `BootDialogPresenter` (boot background check), `SplashPresenter.checkForUpdates`, `AboutSettingsPresenter`/`AboutSimpleSettingsPresenter` (manual check).
+- **Side Effects / I/O**: network manifest fetch via `AppUpdateChecker`; on force-check opens `AppDialogPresenter` install dialog. Background found-update now only calls `onFinish()`.
+
 ### `common/.../app/presenters/service/SidebarService.java` (Role: presenter, Lines: 331)
 - **Responsibility**: Default sidebar sections; registers `R.string.header_blocked_channels -> MediaGroup.TYPE_BLOCKED_CHANNELS`.
 
@@ -170,11 +183,13 @@ Backup:         BackupAndRestoreManager -> Utils.BACKUP_PREFS (includes blocked_
 git submodule update --init --recursive
 
 # Lint (CI)
-JAVA_HOME=/usr/lib/jvm/java-17-openjdk ./gradlew lintStbetaRelease
+JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 ./gradlew lintStbetaRelease
 
 # Build debug (README) / release (CI)
-JAVA_HOME=/usr/lib/jvm/java-17-openjdk ./gradlew assembleStstableDebug
-JAVA_HOME=/usr/lib/jvm/java-17-openjdk ./gradlew clean assembleStbetaRelease
+JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 ./gradlew assembleStstableDebug
+JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 ./gradlew clean assembleStbetaRelease
+
+# Requires local.properties: sdk.dir=<path to Android SDK>
 
 # APK output
 # smarttubetv/build/outputs/apk/ststable/debug/  |  .../stbeta/release/
@@ -187,8 +202,10 @@ JAVA_HOME=/usr/lib/jvm/java-17-openjdk ./gradlew clean assembleStbetaRelease
 - `BlockedChannelData.Channel.equals` id-fallback branch compares `Channel` to `String` — always false; name-less blocked channels won't match by id.
 - Keyword filter matches title only (not description/tags/channel).
 - No unit tests for `KeywordFilterManager` or `BlockedChannelData` (Robolectric configured in `common`).
-- `SharedModules` / `MediaServiceCore` submodules not checked out in this workspace.
+- `GeneralData.mIsOldUpdateNotificationsEnabled` (prefs index 43) is now unused after the sidebar-update removal; kept to avoid shifting positional prefs parsing.
+- `SharedModules` / `MediaServiceCore` submodules are initialized via `git submodule update --init --recursive`.
 
 ## 7. Recent Iteration Changes
 
+- **2026-10-05**: Removed sidebar "Update" entry. `AppUpdatePresenter.onUpdateFound` background path is now silent (was `pinUpdateSection` -> `BrowsePresenter.pinItem`); deleted `pinUpdateSection`, `createChangelog`, and unused imports. Collapsed the About settings 3-way notification radio (`sidebar_notification`/`dialog_notification`) to a single `check_updates_auto` switch. Manual `Check for updates` still shows the install dialog. `GeneralData.mIsOldUpdateNotificationsEnabled` left in place (positional prefs parsing) but now unused.
 - **2026-10-05**: Initial `CODEBASE.md` generated from full-repo exploration (filter engine, persistence, UI, CI, module graph).

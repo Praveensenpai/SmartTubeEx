@@ -64,24 +64,10 @@ public class AboutSettingsPresenter extends BasePresenter<Void> {
     }
 
     private void appendAutoUpdateSwitch(AppDialogPresenter settingsPresenter) {
-        GeneralData generalData = GeneralData.instance(getContext());
-        List<OptionItem> items = new ArrayList<>();
-
-        items.add(UiOptionItem.from(getContext().getString(R.string.option_disabled),
-                optionItem -> mUpdateChecker.setUpdateCheckEnabled(false),
-                !mUpdateChecker.isUpdateCheckEnabled()));
-
-        items.add(UiOptionItem.from(getContext().getString(R.string.sidebar_notification), optionItem -> {
-            mUpdateChecker.setUpdateCheckEnabled(true);
-            generalData.setOldUpdateNotificationsEnabled(false);
-        }, mUpdateChecker.isUpdateCheckEnabled() && !generalData.isOldUpdateNotificationsEnabled()));
-        
-        items.add(UiOptionItem.from(getContext().getString(R.string.dialog_notification), optionItem -> {
-            mUpdateChecker.setUpdateCheckEnabled(true);
-            generalData.setOldUpdateNotificationsEnabled(true);
-        }, mUpdateChecker.isUpdateCheckEnabled() && generalData.isOldUpdateNotificationsEnabled()));
-
-        settingsPresenter.appendRadioCategory(getContext().getString(R.string.check_updates_auto), items);
+        // Background update checks are silent. This switch only controls whether they run at all.
+        settingsPresenter.appendSingleSwitch(UiOptionItem.from(getContext().getString(R.string.check_updates_auto),
+                optionItem -> mUpdateChecker.setUpdateCheckEnabled(optionItem.isSelected()),
+                mUpdateChecker.isUpdateCheckEnabled()));
     }
 
     private void appendUpdateCheckButton(AppDialogPresenter settingsPresenter) {

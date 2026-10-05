@@ -6,11 +6,9 @@ import com.liskovsoft.appupdatechecker2.AppUpdateChecker;
 import com.liskovsoft.appupdatechecker2.AppUpdateCheckerListener;
 import com.liskovsoft.sharedutils.helpers.MessageHelpers;
 import com.liskovsoft.smartyoutubetv2.common.R;
-import com.liskovsoft.smartyoutubetv2.common.app.models.errors.ErrorFragmentData;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.UiOptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
-import com.liskovsoft.smartyoutubetv2.common.app.presenters.BrowsePresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.base.BasePresenter;
 import com.liskovsoft.smartyoutubetv2.common.prefs.GeneralData;
 import com.liskovsoft.smartyoutubetv2.common.utils.LoadingManager;
@@ -61,13 +59,13 @@ public class AppUpdatePresenter extends BasePresenter<Void> implements AppUpdate
 
     @Override
     public void onUpdateFound(String versionName, List<String> changelog, String apkPath) {
+        // Background updates are silent: no sidebar entry, no pop-up dialog.
+        // Only an explicit user-triggered check (forceCheck) surfaces a dialog.
         if (mIsForceCheck) {
             LoadingManager.showLoading(getContext(), false);
             showUpdateDialog(versionName, changelog, apkPath);
-        } else if (GeneralData.instance(getContext()).isOldUpdateNotificationsEnabled()) {
-            showUpdateDialog(versionName, changelog, apkPath);
         } else {
-            pinUpdateSection(versionName, changelog, apkPath);
+            onFinish();
         }
     }
 
@@ -107,33 +105,6 @@ public class AppUpdatePresenter extends BasePresenter<Void> implements AppUpdate
         mSettingsPresenter.showDialog(String.format("%s %s", getContext().getString(R.string.app_name), versionName), AppUpdatePresenter::unhold);
     }
 
-    private void pinUpdateSection(String versionName, List<String> changelog, String apkPath) {
-        // Don't show update dialog if the player opened or the app is collapsed
-        if (getContext() == null) {
-            return;
-        }
-
-        BrowsePresenter.instance(getContext()).pinItem(getContext().getString(R.string.update_found), R.drawable.action_info, new ErrorFragmentData() {
-            @Override
-            public void onAction() {
-                GeneralData.instance(getContext()).setChangelog(changelog);
-                mUpdateChecker.installUpdate();
-            }
-
-            @Override
-            public String getMessage() {
-                return String.format("%s %s", getContext().getString(R.string.app_name), versionName) + " " +
-                        getContext().getString(R.string.update_changelog) + ":\n" +
-                        createChangelog(changelog);
-            }
-
-            @Override
-            public String getActionText() {
-                return getContext().getString(R.string.install_update);
-            }
-        });
-    }
-
     private List<OptionItem> createChangelogOptions(List<String> changelog) {
         List<OptionItem> options = new ArrayList<>();
 
@@ -142,26 +113,5 @@ public class AppUpdatePresenter extends BasePresenter<Void> implements AppUpdate
         }
 
         return options;
-    }
-
-    private String createChangelog(List<String> changelog) {
-        StringBuilder builder = new StringBuilder();
-
-        int maxLines = 30;
-        int lineNum = 0;
-
-        for (String change : changelog) {
-            if (lineNum > maxLines) {
-                break;
-            }
-
-            builder.append("- ");
-            builder.append(change);
-            builder.append("\n");
-
-            lineNum++;
-        }
-
-        return builder.toString();
     }
 }
