@@ -59,7 +59,7 @@ public class BlockedChannelData implements ProfileChangeListener {
                 }
 
                 if (channelId != null && channel.channelId != null) {
-                    return Helpers.equals(channel, channel.channelId);
+                    return Helpers.equals(channelId, channel.channelId);
                 }
             }
 
