@@ -96,10 +96,11 @@ Backup:         BackupAndRestoreManager -> Utils.BACKUP_PREFS (includes blocked_
   ```
 - **Consumers**: `VideoGroupObjectAdapter`, `DeferredVideoGroupObjectAdapter`, grid fragments. Every list flowing through here is auto-filtered (Home/Search/Subs/Playlists/Channel uploads).
 
-### `common/.../app/models/data/Video.java` (Role: domain/model, Lines: 978)
+### `common/.../app/models/data/Video.java` (Role: domain/model, Lines: 1012)
 - **Responsibility**: Video/channel/playlist/header model.
-- **Relevant signatures**: `boolean belongsToBlockedChannels()`, `String getChannelIdOrName()`, `belongsToGroup(long)`, `getTitle()`, `getAuthor()`, `sync(State)`.
+- **Relevant signatures**: `boolean belongsToBlockedChannels()`, `boolean belongsToFeedSection()`, `boolean isSectionPlaylistEnabled(Context)`, `String getChannelIdOrName()`, `belongsToGroup(long)`, `getTitle()`, `getAuthor()`, `sync(State)`.
 - **Autoplay filter**: `findNextVideo(MediaItemMetadata)` (remote queue) skips suggestion items whose channel is in `BlockedChannelData` when the block list is non-empty — a second `BlockedChannelData` consumer outside the `VideoGroup` gate.
+- **Section-playlist gate**: `isSectionPlaylistEnabled` excludes `belongsToFeedSection()` rows (Home/Search/Subscriptions/Trending/Music/News/Gaming/Sports/Movies/Live/Kids/Recommended), so `SuggestionsController` falls through to `nextMediaItem` (real YouTube suggestions) instead of walking the clicked feed row. Channel uploads, channel content, and user playlists keep section-playlist.
 
 ### `common/.../app/presenters/settings/GeneralSettingsPresenter.java` (Role: presenter, Lines: 848)
 - **Responsibility**: General settings tree incl. keyword filter entry.

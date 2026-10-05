@@ -942,10 +942,44 @@ public final class Video {
     //}
 
     /**
-     * The section playlist intended (as a backup replacement) for cases when regular playlist not available
+     * True when the video's row is an algorithmic feed (Home, Search, Subscriptions,
+     * Trending, Music, etc.) instead of an ordered playlist / channel uploads list.
+     *
+     * <p>Section-playlist must stay disabled for these rows. Otherwise "next" walks the
+     * feed row (e.g. the next card in a Home shelf or in the search results) instead of
+     * following the real YouTube suggestions for the current video.
+     */
+    public boolean belongsToFeedSection() {
+        if (getGroup() == null) {
+            return false;
+        }
+
+        switch (getGroup().getType()) {
+            case MediaGroup.TYPE_HOME:
+            case MediaGroup.TYPE_SEARCH:
+            case MediaGroup.TYPE_RECOMMENDED:
+            case MediaGroup.TYPE_SUBSCRIPTIONS:
+            case MediaGroup.TYPE_MUSIC:
+            case MediaGroup.TYPE_NEWS:
+            case MediaGroup.TYPE_GAMING:
+            case MediaGroup.TYPE_TRENDING:
+            case MediaGroup.TYPE_SPORTS:
+            case MediaGroup.TYPE_MOVIES:
+            case MediaGroup.TYPE_LIVE:
+            case MediaGroup.TYPE_KIDS_HOME:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * The section playlist intended (as a backup replacement) for cases when regular playlist not available.
+     * Disabled for algorithmic feed sections so real suggestions win there.
      */
     public boolean isSectionPlaylistEnabled(Context context) {
-        return PlayerTweaksData.instance(context).isSectionPlaylistEnabled() && !belongsToSuggestions() && !belongsToPlaybackQueue()
+        return PlayerTweaksData.instance(context).isSectionPlaylistEnabled() && !belongsToFeedSection()
+                && !belongsToSuggestions() && !belongsToPlaybackQueue()
                 && (!checkAllVideosHasPlaylist() || nextMediaItem == null || !isMix()) // skip hidden playlists (music videos usually)
                 && (!isRemote || remotePlaylistId == null);
     }

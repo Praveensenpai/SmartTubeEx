@@ -1,24 +1,14 @@
-# 🌸 SmartTubeEx v32.08 ✨
+# 🌸 SmartTubeEx v32.09 ✨
 
-Silent background updates and a clean sidebar — the "Update" entry no longer clutters your menu.
+Autoplay now follows YouTube's real suggestions from feed rows, and the channel/keyword filter is lighter.
 
 ### 🌟 What's New
 
-- **🤫 Silent Background Updates** — background update checks now finish quietly: no sidebar entry, no pop-up dialog.
-- **⬆️ Manual Update Only** — the install dialog appears only when you explicitly tap *Check for updates* in Settings → About.
-- **🎨 Cleaner Sidebar** — the sidebar is back to just your content; no update clutter between sections.
+- **▶️ Correct Next Video From Feeds** — opening a video from Home, Search, Subscriptions, Trending, Music, News, Gaming, Sports, Movies, Live or Kids now continues with YouTube's real suggestions instead of the next card in that same row.
+- **📃 Section Playlist Kept For Real Lists** — channel uploads, channel content and user playlists still auto-continue as before, so genuine ordered lists behave unchanged.
+- **🧹 Leaner Filter Path** — removed the dead `VideoFilter` class and corrected the O(1) filter documentation.
+- **🔑 Blocked Channel Matching Fixed** — blocked channels stored without a display name now match by id in the `equals` fallback.
 - **🔐 Signed & Verified** — every APK is signed with the project release keystore, and the build verifies the signature before publishing.
-
-### ⚠️ Upgrading from v32.07 or earlier
-
-This release is signed with a **new release key**. Android will refuse to install it over an older build, so uninstall the old version first:
-
-```bash
-adb uninstall org.smarttube.stable
-adb install SmartTube_stable_32.08_universal.apk
-```
-
-(Or on the TV: Settings → Apps → SmartTube → Uninstall, then install the new APK.)
 
 ### 📦 Assets
 
@@ -29,4 +19,8 @@ adb install SmartTube_stable_32.08_universal.apk
 | `x86` | Emulators |
 | `universal` | If you are unsure which to pick |
 
-Verify your download against `SHA256SUMS.txt`.
+### 🛠 Install
+
+```bash
+adb install -r SmartTube_stable_32.09_universal.apk
+```
