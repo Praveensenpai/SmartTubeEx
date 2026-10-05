@@ -38,7 +38,7 @@ Backup:         BackupAndRestoreManager -> Utils.BACKUP_PREFS (includes blocked_
 - **Included modules**: `:smarttubetv :common :chatkit :leanbackassistant :leanback-1.0.0 :fragment-1.1.0 :filepicker-lib :doubletapplayerview :slidableactivity` + SharedModules/MediaServiceCore/exoplayer generated includes.
 
 ### `smarttubetv/build.gradle` (Role: app/build, Lines: 250)
-- **Responsibility**: App module build. Version `32.07` (versionCode 2397). ABI splits + universal APK. Custom APK naming `SmartTube_<flavor>_<version>_<arch>.apk`. Flavor `stbeta` applies google-services + crashlytics when `google-services.json` present.
+- **Responsibility**: App module build. Version `32.08` (versionCode 2398). ABI splits + universal APK. Custom APK naming `SmartTube_<flavor>_<version>_<arch>.apk`. Flavor `stbeta` applies google-services + crashlytics when `google-services.json` present. Reads `keystore.properties` (root, gitignored) for `signingConfigs.release`, applied to both `release` and `debug` build types.
 - **Consumers**: CI workflow, release process.
 
 ### `common/.../filter/KeywordFilterManager.java` (Role: domain/filter, Lines: 137)
@@ -164,6 +164,12 @@ Backup:         BackupAndRestoreManager -> Utils.BACKUP_PREFS (includes blocked_
 ### CI: `.github/workflows/CI.yml` (Lines: 118)
 - **Trigger**: push to master, workflow_dispatch.
 - **Steps**: checkout (submodules recursive) -> JDK 17 -> append `-nightly-<run>` to versionName -> optional keystore -> `./gradlew lintStbetaRelease` -> `clean assembleStbetaRelease` -> optional VirusTotal -> upload arm64/armv7/universal/x86 APKs.
+
+### Release: `.github/workflows/release.yml` (Lines: 78)
+- **Trigger**: push of tags matching `v*`.
+- **Secrets**: `SIGNING_KEY` (base64 JKS), `KEY_STORE_PASSWORD`, `ALIAS`, `KEY_PASSWORD`.
+- **Steps**: checkout (submodules recursive) -> JDK 17 -> write `keystore.properties` + decode `key.jks` -> `clean assembleStstableRelease` -> `sha256sum` -> `apksigner verify --print-certs` -> publish GitHub Release from `.github/RELEASE_NOTES.md` with all ststable release APKs + `SHA256SUMS.txt`.
+- **Release notes body**: `.github/RELEASE_NOTES.md`.
 
 ## 4. Execution Lifecycle Trace
 
