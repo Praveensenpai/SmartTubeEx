@@ -27,6 +27,7 @@ import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionCatego
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.OptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.ui.UiOptionItem;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.AppDialogPresenter;
+import com.liskovsoft.smartyoutubetv2.common.app.presenters.BrowsePresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.ChannelPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.SearchPresenter;
 import com.liskovsoft.smartyoutubetv2.common.app.presenters.dialogs.menu.VideoMenuPresenter;
@@ -36,6 +37,7 @@ import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.FormatItem;
 import com.liskovsoft.smartyoutubetv2.common.exoplayer.selector.track.SubtitleTrack;
 import com.liskovsoft.smartyoutubetv2.common.misc.MediaServiceManager;
 import com.liskovsoft.smartyoutubetv2.common.misc.ScreensaverManager;
+import com.liskovsoft.smartyoutubetv2.common.prefs.BlockedChannelData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.PlayerData;
 import com.liskovsoft.smartyoutubetv2.common.prefs.SearchData;
 import com.liskovsoft.smartyoutubetv2.common.utils.AppDialogUtil;
@@ -513,6 +515,37 @@ public class PlayerUIController extends BasePlayerController {
         dialogPresenter.showDialog(title);
     }
 
+    private void onBlockChannelClicked() {
+        Video video = getVideo();
+
+        if (video == null || video.isChapter || video.getAuthor() == null) {
+            return;
+        }
+
+        String channelId = video.channelId;
+        String channelName = video.getAuthor();
+        BlockedChannelData blockedChannelData = BlockedChannelData.instance(getContext());
+        boolean isBlocked = blockedChannelData.containsChannel(channelId, channelName);
+
+        if (isBlocked) {
+            blockedChannelData.removeChannel(channelId, channelName);
+            MessageHelpers.showMessage(getContext(), R.string.channel_unblocked);
+        } else {
+            blockedChannelData.addChannel(channelId, channelName);
+            MessageHelpers.showMessage(getContext(), R.string.channel_blocked);
+        }
+
+        showHideBlockedChannelsSection(blockedChannelData);
+    }
+
+    private void showHideBlockedChannelsSection(BlockedChannelData blockedChannelData) {
+        if (blockedChannelData.getChannelCount() == 1) { // show on add first channel
+            BrowsePresenter.instance(getContext()).enableSection(MediaGroup.TYPE_BLOCKED_CHANNELS, true);
+        } else if (blockedChannelData.isEmpty()) { // hide on remove all
+            BrowsePresenter.instance(getContext()).enableSection(MediaGroup.TYPE_BLOCKED_CHANNELS, false);
+        }
+    }
+
     private void onShareLink() {
         fitVideoIntoDialog();
 
@@ -616,6 +649,8 @@ public class PlayerUIController extends BasePlayerController {
             onPlaylistAddClicked();
         } else if (buttonId == R.id.lb_control_closed_captioning) {
             onSubtitleClicked(buttonState);
+        } else if (buttonId == R.id.action_block_channel) {
+            onBlockChannelClicked();
         } else if (buttonId == R.id.action_thumbs_down) {
             onDislikeClicked(buttonState);
         } else if (buttonId == R.id.action_thumbs_up) {
