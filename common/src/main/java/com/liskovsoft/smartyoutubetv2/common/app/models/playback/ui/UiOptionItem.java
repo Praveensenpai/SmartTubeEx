@@ -17,6 +17,7 @@ public class UiOptionItem implements OptionItem {
     private OptionItem[] mRadioItems;
     private ChatReceiver mChatReceiver;
     private CommentsReceiver mCommentsReceiver;
+    private Runnable mLongClick;
 
     public static List<OptionItem> from(List<FormatItem> formats, OptionCallback callback) {
         return from(formats, callback, null);
@@ -87,6 +88,23 @@ public class UiOptionItem implements OptionItem {
         uiOptionItem.mIsSelected = isChecked;
         uiOptionItem.mCallback = callback;
         uiOptionItem.mData = data;
+
+        return uiOptionItem;
+    }
+
+    /**
+     * MOD: Format item with a custom (grouped) title and selected state.
+     */
+    public static OptionItem from(FormatItem format, CharSequence title, OptionCallback callback, boolean isSelected) {
+        if (format == null) {
+            return null;
+        }
+
+        UiOptionItem uiOptionItem = new UiOptionItem();
+        uiOptionItem.mTitle = title;
+        uiOptionItem.mIsSelected = isSelected;
+        uiOptionItem.mFormat = format;
+        uiOptionItem.mCallback = callback;
 
         return uiOptionItem;
     }
@@ -185,5 +203,17 @@ public class UiOptionItem implements OptionItem {
     @Override
     public CommentsReceiver getCommentsReceiver() {
         return mCommentsReceiver;
+    }
+
+    @Override
+    public Runnable getLongClick() {
+        return mLongClick;
+    }
+
+    /**
+     * MOD: Set a long-press action for this option.
+     */
+    public void setLongClick(Runnable longClick) {
+        mLongClick = longClick;
     }
 }

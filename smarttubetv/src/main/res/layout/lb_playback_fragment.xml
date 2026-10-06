@@ -92,6 +92,41 @@
             style="?attr/playbackControlsTimeStyle"/>
     </LinearLayout>
 
+    <!-- Volume overlay -->
+    <LinearLayout
+        android:id="@+id/volume_overlay"
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
+        android:layout_marginStart="40sp"
+        android:layout_marginBottom="80sp"
+        android:padding="12sp"
+        android:gravity="center_vertical"
+        android:background="#70000000"
+        android:visibility="gone">
+        <ImageView
+            android:id="@+id/volume_icon"
+            android:layout_width="32sp"
+            android:layout_height="32sp"
+            android:src="@drawable/action_sound_on" />
+        <ProgressBar
+            android:id="@+id/volume_bar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="200sp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12sp"
+            android:max="100" />
+        <TextView
+            android:id="@+id/volume_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12sp"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
     <!-- Add debug view -->
     <FrameLayout android:id="@+id/debug_view_group"
                  android:layout_width="wrap_content"

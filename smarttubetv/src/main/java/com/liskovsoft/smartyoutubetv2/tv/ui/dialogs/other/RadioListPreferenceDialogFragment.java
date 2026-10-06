@@ -97,5 +97,27 @@ public class RadioListPreferenceDialogFragment extends LeanbackListPreferenceDia
 
             notifyDataSetChanged();
         }
+
+        /**
+         * MOD: Long-press opens a per-entry action (e.g. codec selection for a resolution).
+         */
+        @Override
+        public boolean onItemLongClick(ViewHolder viewHolder) {
+            final int index = viewHolder.getAdapterPosition();
+            if (index == RecyclerView.NO_POSITION) {
+                return false;
+            }
+
+            ListPreference preference = (ListPreference) getPreference();
+            if (preference instanceof LongClickListPreference) {
+                Runnable longClick = ((LongClickListPreference) preference).getLongClick(mEntryValues[index].toString());
+                if (longClick != null) {
+                    longClick.run();
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 }

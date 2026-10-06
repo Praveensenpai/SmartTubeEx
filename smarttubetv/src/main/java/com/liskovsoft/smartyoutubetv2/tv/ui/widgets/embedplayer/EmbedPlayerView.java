@@ -212,6 +212,16 @@ public class EmbedPlayerView extends PlayerView implements PlaybackView {
     }
 
     @Override
+    public void showVolume(float level) {
+
+    }
+
+    @Override
+    public void setVideoCounter(String counter) {
+
+    }
+
+    @Override
     public void setVideo(Video item) {
         mVideo = item;
 

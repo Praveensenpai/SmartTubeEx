@@ -14,10 +14,13 @@ import com.liskovsoft.smartyoutubetv2.common.utils.Utils;
 import com.liskovsoft.smartyoutubetv2.tv.R;
 import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.ChatPreference;
 import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.CommentsPreference;
+import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.LongClickListPreference;
 import com.liskovsoft.smartyoutubetv2.tv.ui.dialogs.other.StringListPreference;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class AppPreferenceManager {
@@ -29,12 +32,18 @@ public class AppPreferenceManager {
         public final CharSequence[] values;
         public final String defaultValue;
         public final Set<String> defaultValues;
+        public final Map<String, Runnable> longClicks;
 
         public ListPreferenceData(CharSequence[] entries, CharSequence[] values, String defaultValue, Set<String> defaultValues) {
+            this(entries, values, defaultValue, defaultValues, null);
+        }
+
+        public ListPreferenceData(CharSequence[] entries, CharSequence[] values, String defaultValue, Set<String> defaultValues, Map<String, Runnable> longClicks) {
             this.entries = entries;
             this.values = values;
             this.defaultValue = defaultValue;
             this.defaultValues = defaultValues;
+            this.longClicks = longClicks;
         }
     }
 
@@ -150,7 +159,7 @@ public class AppPreferenceManager {
     }
 
     public Preference createRadioListPreference(OptionCategory category) {
-        ListPreference pref = new ListPreference(mContext);
+        ListPreference pref = new LongClickListPreference(mContext);
 
         initSingleSelectListPreference(category, pref);
 
@@ -173,6 +182,10 @@ public class AppPreferenceManager {
         pref.setEntries(prefData.entries);
         pref.setEntryValues(prefData.values);
         pref.setValue(prefData.defaultValue);
+
+        if (pref instanceof LongClickListPreference) {
+            ((LongClickListPreference) pref).setLongClicks(prefData.longClicks);
+        }
 
         pref.setOnPreferenceChangeListener((preference, newValue) -> {
             for (OptionItem optionItem : category.options) {
@@ -248,6 +261,7 @@ public class AppPreferenceManager {
         CharSequence[] hashes = new CharSequence[items.size()];
         String defaultValue = null;
         Set<String> defaultValues = new HashSet<>(); // used in multi set lists
+        Map<String, Runnable> longClicks = new HashMap<>(); // MOD: per-item long-press actions
 
         for (int i = 0; i < items.size(); i++) {
             OptionItem optionItem = items.get(i);
@@ -263,13 +277,17 @@ public class AppPreferenceManager {
             titles[i] = title;
             hashes[i] = value;
 
+            if (optionItem.getLongClick() != null) {
+                longClicks.put(value, optionItem.getLongClick());
+            }
+
             if (optionItem.isSelected()) {
                 defaultValue = value;
                 defaultValues.add(value);
             }
         }
 
-        return new ListPreferenceData(titles, hashes, defaultValue, defaultValues);
+        return new ListPreferenceData(titles, hashes, defaultValue, defaultValues, longClicks);
     }
 
     private void initDialogPreference(OptionCategory category, DialogPreference pref) {

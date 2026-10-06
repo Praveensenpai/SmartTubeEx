@@ -1,14 +1,14 @@
-# 🌸 SmartTubeEx v32.10 ✨
+# 🌸 SmartTubeEx v32.11 ✨
 
-Block a bad channel without leaving playback, plus the v32.09 autoplay fix.
+A player-feel pass: on-screen volume, controls that get out of the way, a position counter, and a cleaner quality picker.
 
 ### 🌟 What's New
 
-- **🚫 Block Channel From The Player** — a new player toolbar button blocks (or unblocks) the channel of the video you are watching. No need to back out to the grid and long-press the card.
-- **⚙️ Player Button Toggle** — the button is listed in Settings → Player → Player buttons, so you can place or hide it like any other control.
-- **🧩 Shared Logic** — the player button reuses the existing `BlockedChannelData` store, so blocked channels disappear from all lists and the Blocked Channels sidebar section shows/hides exactly as before.
-- **▶️ Correct Next Video From Feeds** — opening a video from Home, Search, Subscriptions, Trending, Music, News, Gaming, Sports, Movies, Live or Kids continues with YouTube's real suggestions instead of the next card in that same row.
-- **📃 Section Playlist Kept For Real Lists** — channel uploads, channel content and user playlists still auto-continue as before.
+- **🔊 Volume Slider On Screen** — changing volume now shows a bar overlay with a mute icon instead of a toast. It fades out on its own after a moment.
+- **👻 Controls Hide While Paused** — the player UI now auto-hides when paused, just like during playback, so a paused frame stays clean.
+- **🔢 Video Counter** — the player shows your position in the current list (e.g. `3 / 12`). It stays hidden for single videos.
+- **🎚 One Row Per Resolution** — the quality list now shows a single row for each resolution (1080p, 720p, …) instead of a separate row for every codec. The active codec is shown right on the row.
+- **🖐 Long-Press To Pick A Codec** — hold a resolution to open codec choices for that resolution only (AV1 / VP9 / AVC). Tapping the row applies the best available codec.
 - **🔐 Signed & Verified** — every APK is signed with the project release keystore, and the build verifies the signature before publishing.
 
 ### 📦 Assets
@@ -23,5 +23,5 @@ Block a bad channel without leaving playback, plus the v32.09 autoplay fix.
 ### 🛠 Install
 
 ```bash
-adb install -r SmartTube_stable_32.10_universal.apk
+adb install -r SmartTube_stable_32.11_universal.apk
 ```

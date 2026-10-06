@@ -24,6 +24,7 @@ import java.util.List;
 public abstract class MaxControlsVideoPlayerGlue<T extends PlayerAdapter>
         extends PlaybackTransportControlGlue<T> implements TopEdgeFocusListener, PlayerView {
     private String mQualityInfo;
+    private String mVideoCounter;
     private Video mVideo;
     private WeakReference<PlaybackTransportRowPresenter.ViewHolder> mTransportViewHolder;
     private WeakReference<AbstractDetailsDescriptionPresenter.ViewHolder> mDescriptionViewHolder;
@@ -94,6 +95,7 @@ public abstract class MaxControlsVideoPlayerGlue<T extends PlayerAdapter>
 
                 viewHolder.setTopEdgeFocusListener(MaxControlsVideoPlayerGlue.this);
                 viewHolder.setQualityInfo(mQualityInfo);
+                viewHolder.setVideoCounter(mVideoCounter);
                 viewHolder.setDateVisibility(isControlsVisible());
                 // Don't uncomment
                 // Reset to defaults
@@ -132,6 +134,15 @@ public abstract class MaxControlsVideoPlayerGlue<T extends PlayerAdapter>
     @Override
     public void setVideo(Video video) {
         mVideo = video;
+    }
+
+    @Override
+    public void setVideoCounter(String counter) {
+        mVideoCounter = counter;
+
+        if (getTransportViewHolder() != null) {
+            getTransportViewHolder().setVideoCounter(counter);
+        }
     }
 
     @Override

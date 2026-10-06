@@ -13,4 +13,8 @@ public interface OptionItem {
     OptionItem[] getRadio();
     ChatReceiver getChatReceiver();
     CommentsReceiver getCommentsReceiver();
+    /**
+     * MOD: Optional long-press action (e.g. pick codec for a resolution).
+     */
+    Runnable getLongClick();
 }

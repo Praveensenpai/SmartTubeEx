@@ -223,7 +223,7 @@ public class LeanbackListPreferenceDialogFragment extends LeanbackPreferenceDial
     }
 
     public class AdapterSingle extends RecyclerView.Adapter<ViewHolder>
-            implements ViewHolder.OnItemClickListener {
+            implements ViewHolder.OnItemClickListener, ViewHolder.OnItemLongClickListener {
 
         private final CharSequence[] mEntries;
         private final CharSequence[] mEntryValues;
@@ -242,7 +242,9 @@ public class LeanbackListPreferenceDialogFragment extends LeanbackPreferenceDial
             final LayoutInflater inflater = LayoutInflater.from(parent.getContext());
             final View view = inflater.inflate(androidx.leanback.preference.R.layout.leanback_list_preference_item_single,
                     parent, false);
-            return new ViewHolder(view, this);
+            ViewHolder holder = new ViewHolder(view, this);
+            holder.setOnItemLongClickListener(this);
+            return holder;
         }
 
         @Override
@@ -255,7 +257,15 @@ public class LeanbackListPreferenceDialogFragment extends LeanbackPreferenceDial
         public int getItemCount() {
             return mEntries.length;
         }
-        
+
+        /**
+         * MOD: Optional long-press action. Overridden by subclasses (e.g. quality dialog).
+         */
+        @Override
+        public boolean onItemLongClick(ViewHolder viewHolder) {
+            return false;
+        }
+
         @Override
         public void onItemClick(ViewHolder viewHolder) {
             final int index = viewHolder.getAdapterPosition();
@@ -344,16 +354,21 @@ public class LeanbackListPreferenceDialogFragment extends LeanbackPreferenceDial
         }
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
 
         public interface OnItemClickListener {
             void onItemClick(ViewHolder viewHolder);
+        }
+
+        public interface OnItemLongClickListener {
+            boolean onItemLongClick(ViewHolder viewHolder);
         }
 
         private final Checkable mWidgetView;
         private final TextView mTitleView;
         private final ViewGroup mContainer;
         private final OnItemClickListener mListener;
+        private OnItemLongClickListener mLongClickListener;
 
         public ViewHolder(@NonNull View view, @NonNull OnItemClickListener listener) {
             super(view);
@@ -361,6 +376,7 @@ public class LeanbackListPreferenceDialogFragment extends LeanbackPreferenceDial
             mContainer = (ViewGroup) view.findViewById(androidx.leanback.preference.R.id.container);
             mTitleView = (TextView) view.findViewById(android.R.id.title);
             mContainer.setOnClickListener(this);
+            mContainer.setOnLongClickListener(this);
             mListener = listener;
         }
 
@@ -376,9 +392,18 @@ public class LeanbackListPreferenceDialogFragment extends LeanbackPreferenceDial
             return mContainer;
         }
 
+        public void setOnItemLongClickListener(OnItemLongClickListener listener) {
+            mLongClickListener = listener;
+        }
+
         @Override
         public void onClick(View v) {
             mListener.onItemClick(this);
+        }
+
+        @Override
+        public boolean onLongClick(View v) {
+            return mLongClickListener != null && mLongClickListener.onItemLongClick(this);
         }
     }
 }

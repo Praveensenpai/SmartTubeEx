@@ -38,7 +38,7 @@ Backup:         BackupAndRestoreManager -> Utils.BACKUP_PREFS (includes blocked_
 - **Included modules**: `:smarttubetv :common :chatkit :leanbackassistant :leanback-1.0.0 :fragment-1.1.0 :filepicker-lib :doubletapplayerview :slidableactivity` + SharedModules/MediaServiceCore/exoplayer generated includes.
 
 ### `smarttubetv/build.gradle` (Role: app/build, Lines: 250)
-- **Responsibility**: App module build. Version `32.08` (versionCode 2398). ABI splits + universal APK. Custom APK naming `SmartTube_<flavor>_<version>_<arch>.apk`. Flavor `stbeta` applies google-services + crashlytics when `google-services.json` present. Reads `keystore.properties` (root, gitignored) for `signingConfigs.release`, applied to both `release` and `debug` build types.
+- **Responsibility**: App module build. Version `32.11` (versionCode 2401). ABI splits + universal APK. Custom APK naming `SmartTube_<flavor>_<version>_<arch>.apk`. Flavor `stbeta` applies google-services + crashlytics when `google-services.json` present. Reads `keystore.properties` (root, gitignored) for `signingConfigs.release`, applied to both `release` and `debug` build types.
 - **Consumers**: CI workflow, release process.
 
 ### `common/.../filter/KeywordFilterManager.java` (Role: domain/filter, Lines: 137)
@@ -147,7 +147,22 @@ Backup:         BackupAndRestoreManager -> Utils.BACKUP_PREFS (includes blocked_
 
 ### `common/.../utils/Utils.java` (Role: infra/util, Lines: 1308)
 - **Responsibility**: misc helpers incl. backup allowlist.
-- **Relevant**: `BACKUP_PREFS` includes `"blocked_words_prefs.xml"` (line ~116). `BACKUP_DIRS`, `KNOWN_PACKAGES`.
+- **Relevant**: `BACKUP_PREFS` includes `"blocked_words_prefs.xml"` (line ~116). `BACKUP_DIRS`, `KNOWN_PACKAGES`. `setPlayerVolume`/`volumeUpPlayer` call `player.showVolume(...)` (custom overlay) instead of `MessageHelpers` toast.
+
+### Player UX additions (2026-10-06)
+- **`PlayerUI`**: `showVolume(float level)`, `setVideoCounter(String counter)`.
+- **`PlayerView`** (glue): `setVideoCounter(String counter)`.
+- **`PlaybackFragment`**: `showVolume` overlay (`R.id.volume_overlay` in `lb_playback_fragment.xml`, hides after 1.5 s) and `setVideoCounter` -> `mPlayerGlue`.
+- **`EmbedPlayerView`**: no-op `showVolume`/`setVideoCounter`.
+- **`Playlist`**: `int getSize()`, `int getCurrentIndex()`.
+- **`PlayerUIController`**: `updateVideoCounter()` on `onVideoLoaded` shows `"<index+1> / <size>"` from `Playlist.instance()` when `size > 1`; `mUiAutoHideHandler` no longer gated on `isPlaying()`.
+- **`PlaybackTransportRowPresenter`**: `mVideoCounter` TextView (`R.id.video_counter`, in `lb_playback_transport_controls_row.xml`), `setVideoCounter(String)` toggles visibility.
+- **`HQDialogController`**: `buildVideoFormatOptions` groups video `FormatItem`s by `TrackSelectorUtil.getRealHeight` (one row per resolution); row applies best/selected codec and shows selected codec suffix; long-press -> `showCodecDialog` lists codecs for that resolution only.
+- **`OptionItem`/`UiOptionItem`**: `getLongClick()`, `setLongClick(Runnable)`, `from(FormatItem, CharSequence title, OptionCallback, boolean)`.
+- **`AppPreferenceManager`**: `ListPreferenceData.longClicks` (`Map<String,Runnable>`); radio prefs use `LongClickListPreference`.
+- **`LongClickListPreference`** (new, `smarttubetv/.../dialogs/other/`): `ListPreference` holding per-entry long-press runnables.
+- **`LeanbackListPreferenceDialogFragment.ViewHolder`**: implements `OnLongClickListener`; `AdapterSingle.onItemLongClick` hook.
+- **`RadioListPreferenceDialogFragment.AdapterRadio.onItemLongClick`**: dispatches to the entry's `LongClickListPreference` action.
 
 ### `common/.../misc/BackupAndRestoreManager.java` (416) / `BackupAndRestoreHelper.java` (327) / `app/presenters/settings/BackupSettingsPresenter.java` (235)
 - **Responsibility**: Export/import prefs + dirs listed in `Utils.BACKUP_PREFS`/`BACKUP_DIRS`. Channel blacklist rides in AppPrefs profile data.
@@ -204,6 +219,10 @@ JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 ./gradlew clean assembleStbetaRelea
 - `SharedModules` / `MediaServiceCore` submodules are initialized via `git submodule update --init --recursive`.
 
 ## 7. Recent Iteration Changes
+
+- **2026-10-06**: Player UX pass 2 (resolution-grouped quality). `HQDialogController` now shows one row per resolution instead of one per codec variant. Selecting a row applies the best codec (AV1 > VP9 > AVC) or the currently-selected codec; the row title appends the active codec. Long-press opens a codec-only dialog for that resolution. Plumbing: `OptionItem.getLongClick()`/`UiOptionItem.setLongClick` + `UiOptionItem.from(FormatItem, title, callback, isSelected)`; `AppPreferenceManager.ListPreferenceData.longClicks`; new `LongClickListPreference`; `LeanbackListPreferenceDialogFragment.ViewHolder` implements `OnLongClickListener` with `AdapterSingle.onItemLongClick`; `RadioListPreferenceDialogFragment.AdapterRadio` dispatches per-entry actions. Verified: `:smarttubetv:compileStstableDebugJavaWithJavac` BUILD SUCCESSFUL, `:common:testStstableDebugUnitTest` BUILD SUCCESSFUL.
+
+- **2026-10-06**: Player UX pass 1. (1) Volume slider overlay replaces the `MessageHelpers` toast in `Utils.setPlayerVolume`/`volumeUpPlayer`; new `showVolume(float)` on `PlayerUI`, implemented in `PlaybackFragment` (overlay in `lb_playback_fragment.xml`, hides after 1.5 s) and no-op in `EmbedPlayerView`. (2) UI now auto-hides while paused: `PlayerUIController.mUiAutoHideHandler` dropped the `isPlaying()` gate (dialog check retained). (3) Video counter: `Playlist.getSize()/getCurrentIndex()`, `PlayerUIController.updateVideoCounter()` on `onVideoLoaded`, TextView `R.id.video_counter` in `lb_playback_transport_controls_row.xml` wired through `PlaybackTransportRowPresenter` + `MaxControlsVideoPlayerGlue` + `PlayerView.setVideoCounter`. Verified: `:smarttubetv:compileStstableDebugJavaWithJavac` BUILD SUCCESSFUL.
 
 - **2026-10-06**: Added block-channel-from-player. New `PLAYER_BUTTON_BLOCK_CHANNEL` (`PlayerTweaksData`), id `action_block_channel`, vector `common/.../drawable/action_block_channel.xml`, `BlockChannelAction` (PaddingAction) registered in `VideoPlayerGlue` secondary actions, handled by `PlayerUIController.onBlockChannelClicked` (reuses `BlockedChannelData` + `showHideBlockedChannelsSection`), toggled in `PlayerSettingsPresenter` player-buttons list. Version bumped to `32.10` (versionCode 2400). Verified: `assembleStstableDebug` green, `testStstableDebugUnitTest` 7/7.
 

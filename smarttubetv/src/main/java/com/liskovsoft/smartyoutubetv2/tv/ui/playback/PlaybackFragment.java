@@ -3,6 +3,8 @@ package com.liskovsoft.smartyoutubetv2.tv.ui.playback;
 import android.media.session.PlaybackState;
 import android.os.Build.VERSION;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
@@ -13,6 +15,9 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStub;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -91,6 +96,7 @@ import com.liskovsoft.googlecommon.common.helpers.YouTubeHelper;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -125,6 +131,16 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
     private Boolean mIsControlsShownPreviously;
     private Video mPendingFocus;
     private String mSelectedVideoId;
+    private final Handler mVolumeHandler = new Handler(Looper.getMainLooper());
+    private final Runnable mHideVolumeOverlay = () -> {
+        View root = getView();
+        if (root != null) {
+            View overlay = root.findViewById(R.id.volume_overlay);
+            if (overlay != null) {
+                overlay.setVisibility(View.GONE);
+            }
+        }
+    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -930,6 +946,51 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
         if (getView() != null) {
             LiveChatView liveChat = getView().findViewById(R.id.live_chat);
             liveChat.setChatReceiver(chatReceiver);
+        }
+    }
+
+    @Override
+    public void showVolume(float level) {
+        View root = getView();
+
+        if (root == null) {
+            return;
+        }
+
+        View overlay = root.findViewById(R.id.volume_overlay);
+
+        if (overlay == null) {
+            return;
+        }
+
+        int percent = Math.round(Math.max(0f, level) * 100f);
+
+        ImageView icon = root.findViewById(R.id.volume_icon);
+        ProgressBar bar = root.findViewById(R.id.volume_bar);
+        TextView text = root.findViewById(R.id.volume_text);
+
+        if (icon != null) {
+            icon.setImageResource(percent == 0 ? R.drawable.action_sound_off : R.drawable.action_sound_on);
+        }
+
+        if (bar != null) {
+            bar.setProgress(Math.min(percent, 100));
+        }
+
+        if (text != null) {
+            text.setText(String.format(Locale.US, "%d%%", percent));
+        }
+
+        overlay.setVisibility(View.VISIBLE);
+
+        mVolumeHandler.removeCallbacks(mHideVolumeOverlay);
+        mVolumeHandler.postDelayed(mHideVolumeOverlay, 1500);
+    }
+
+    @Override
+    public void setVideoCounter(String counter) {
+        if (mPlayerGlue != null) {
+            mPlayerGlue.setVideoCounter(counter);
         }
     }
 

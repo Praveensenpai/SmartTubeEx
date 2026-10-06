@@ -92,6 +92,7 @@ public class PlaybackTransportRowPresenter extends PlaybackRowPresenter {
         final TextView mCurrentTime;
         final TextView mEndingTime;
         final TextView mQualityInfo;
+        final TextView mVideoCounter;
         final TextView mDateTime;
         final ViewGroup mAdditionalInfo;
         final ViewGroup mTimeInfo;
@@ -436,6 +437,7 @@ public class PlaybackTransportRowPresenter extends PlaybackRowPresenter {
             mCurrentTime = (TextView) rootView.findViewById(R.id.current_time);
             mTotalTime = (TextView) rootView.findViewById(R.id.total_time);
             mQualityInfo = (TextView) rootView.findViewById(com.liskovsoft.smartyoutubetv2.tv.R.id.quality_info);
+            mVideoCounter = (TextView) rootView.findViewById(com.liskovsoft.smartyoutubetv2.tv.R.id.video_counter);
             mDateTime = (TextView) rootView.findViewById(com.liskovsoft.smartyoutubetv2.tv.R.id.date_time);
             mEndingTime = (TextView) rootView.findViewById(com.liskovsoft.smartyoutubetv2.tv.R.id.ending_time);
             mEndingTimeFormat = rootView.getContext().getString(com.liskovsoft.smartyoutubetv2.tv.R.string.player_ending_time);
@@ -789,6 +791,19 @@ public class PlaybackTransportRowPresenter extends PlaybackRowPresenter {
                 } else {
                     mQualityInfo.setVisibility(View.GONE);
                 }
+            }
+        }
+
+        void setVideoCounter(String content) {
+            if (mVideoCounter == null) {
+                return;
+            }
+
+            if (content != null && !content.isEmpty()) {
+                mVideoCounter.setText(content);
+                mVideoCounter.setVisibility(View.VISIBLE);
+            } else {
+                mVideoCounter.setVisibility(View.GONE);
             }
         }
 

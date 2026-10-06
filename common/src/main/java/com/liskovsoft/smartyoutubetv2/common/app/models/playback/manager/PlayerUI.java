@@ -39,4 +39,6 @@ public interface PlayerUI {
     void setSeekBarSegments(List<SeekBarSegment> segments);
     void updateEndingTime();
     void setChatReceiver(ChatReceiver chatReceiver);
+    void showVolume(float level);
+    void setVideoCounter(String counter);
 }

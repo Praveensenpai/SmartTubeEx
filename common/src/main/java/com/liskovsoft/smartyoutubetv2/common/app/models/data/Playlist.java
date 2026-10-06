@@ -231,6 +231,14 @@ public class Playlist {
         return null;
     }
 
+    public int getSize() {
+        return mPlaylist.size();
+    }
+
+    public int getCurrentIndex() {
+        return mCurrentIndex;
+    }
+
     public List<Video> getAll() {
         return Collections.unmodifiableList(mPlaylist);
     }

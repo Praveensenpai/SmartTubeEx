@@ -18,6 +18,7 @@ import com.liskovsoft.sharedutils.helpers.MessageHelpers;
 import com.liskovsoft.sharedutils.mylogger.Log;
 import com.liskovsoft.sharedutils.rx.RxHelper;
 import com.liskovsoft.smartyoutubetv2.common.R;
+import com.liskovsoft.smartyoutubetv2.common.app.models.data.Playlist;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.Video;
 import com.liskovsoft.smartyoutubetv2.common.app.models.data.VideoGroup;
 import com.liskovsoft.smartyoutubetv2.common.app.models.playback.BasePlayerController;
@@ -73,8 +74,8 @@ public class PlayerUIController extends BasePlayerController {
             return;
         }
 
-        // Playing the video and dialog overlay isn't shown
-        if (getPlayer().isPlaying() && !getAppDialogPresenter().isDialogShown()) {
+        // Dialog overlay isn't shown
+        if (!getAppDialogPresenter().isDialogShown()) {
             if (getPlayer().isControlsShown()) { // don't hide when suggestions is shown
                 getPlayer().showOverlay(false);
                 mOverlayHideTimeMs = System.currentTimeMillis();
@@ -301,6 +302,23 @@ public class PlayerUIController extends BasePlayerController {
 
         getPlayer().updateEndingTime();
         applySoundOffButtonState();
+        updateVideoCounter();
+    }
+
+    private void updateVideoCounter() {
+        if (getPlayer() == null) {
+            return;
+        }
+
+        Playlist playlist = Playlist.instance();
+        int index = playlist.getCurrentIndex();
+        int size = playlist.getSize();
+
+        if (index >= 0 && size > 1) {
+            getPlayer().setVideoCounter((index + 1) + " / " + size);
+        } else {
+            getPlayer().setVideoCounter(null);
+        }
     }
 
     @Override

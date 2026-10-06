@@ -412,7 +412,7 @@ public class Utils {
             return;
         }
         player.setVolume(volume / 100f);
-        MessageHelpers.showMessage(context, context.getString(R.string.volume, getPlayerVolume(player)));
+        player.showVolume(player.getVolume());
     }
 
     public static void volumeUp(Context context, PlayerManager player, boolean up) {
@@ -452,7 +452,7 @@ public class Utils {
 
             // Check that volume is set.
             // Because global value may not be supported (see FireTV Stick).
-            MessageHelpers.showMessage(context, context.getString(R.string.volume, (int) (player.getVolume() * 100)));
+            player.showVolume(player.getVolume());
         }
     }
 
