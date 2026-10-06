@@ -294,8 +294,12 @@ public class HQDialogController extends BasePlayerController {
         if (getPlayer() == null) {
             return;
         }
-        addCategoryInt(AppDialogUtil.createAudioLanguageCategory(getContext(),
-                () -> getPlayer().restartEngine()));
+        OptionCategory category = AppDialogUtil.createAudioLanguageCategory(getContext(),
+                getPlayer().getAudioFormats(),
+                () -> getPlayer().restartEngine());
+        if (category != null) {
+            addCategoryInt(category);
+        }
     }
 
     private void addNetworkEngine() {

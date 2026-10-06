@@ -38,7 +38,7 @@ Backup:         BackupAndRestoreManager -> Utils.BACKUP_PREFS (includes blocked_
 - **Included modules**: `:smarttubetv :common :chatkit :leanbackassistant :leanback-1.0.0 :fragment-1.1.0 :filepicker-lib :doubletapplayerview :slidableactivity` + SharedModules/MediaServiceCore/exoplayer generated includes.
 
 ### `smarttubetv/build.gradle` (Role: app/build, Lines: 250)
-- **Responsibility**: App module build. Version `32.11` (versionCode 2401). ABI splits + universal APK. Custom APK naming `SmartTube_<flavor>_<version>_<arch>.apk`. Flavor `stbeta` applies google-services + crashlytics when `google-services.json` present. Reads `keystore.properties` (root, gitignored) for `signingConfigs.release`, applied to both `release` and `debug` build types.
+- **Responsibility**: App module build. Version `32.12` (versionCode 2402). ABI splits + universal APK. Custom APK naming `SmartTube_<flavor>_<version>_<arch>.apk`. Flavor `stbeta` applies google-services + crashlytics when `google-services.json` present. Reads `keystore.properties` (root, gitignored) for `signingConfigs.release`, applied to both `release` and `debug` build types.
 - **Consumers**: CI workflow, release process.
 
 ### `common/.../filter/KeywordFilterManager.java` (Role: domain/filter, Lines: 137)
@@ -219,6 +219,8 @@ JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 ./gradlew clean assembleStbetaRelea
 - `SharedModules` / `MediaServiceCore` submodules are initialized via `git submodule update --init --recursive`.
 
 ## 7. Recent Iteration Changes
+ 
+- **2026-10-07**: In-player audio language filtering (v32.12). `HQDialogController.addAudioLanguage()` now passes `getPlayer().getAudioFormats()` to overloaded `AppDialogUtil.createAudioLanguageCategory`. The dialog extracts available audio languages directly from the video streams (normalizing tags and dub markers). If a video has only 1 audio language (or only original), the "Audio language" entry is omitted from the playback settings menu to prevent clutter. For multi-audio videos (e.g. multi-dub content), only the actual available tracks (plus Original language) are shown, eliminating over 150 irrelevant device locales. Global preferences in `PlayerSettingsPresenter` remain intact. Added `AppDialogUtilAudioLanguageTest` covering language extraction, normalization, and single-stream category omission. Version bumped to `32.12` (versionCode 2402). Verified: `:common:testStstableDebugUnitTest` 12/12 passed, `:smarttubetv:compileStstableDebugJavaWithJavac` clean, `assembleStstableDebug` green.
 
 - **2026-10-06**: Player UX pass 2 (resolution-grouped quality). `HQDialogController` now shows one row per resolution instead of one per codec variant. Selecting a row applies the best codec (AV1 > VP9 > AVC) or the currently-selected codec; the row title appends the active codec. Long-press opens a codec-only dialog for that resolution. Plumbing: `OptionItem.getLongClick()`/`UiOptionItem.setLongClick` + `UiOptionItem.from(FormatItem, title, callback, isSelected)`; `AppPreferenceManager.ListPreferenceData.longClicks`; new `LongClickListPreference`; `LeanbackListPreferenceDialogFragment.ViewHolder` implements `OnLongClickListener` with `AdapterSingle.onItemLongClick`; `RadioListPreferenceDialogFragment.AdapterRadio` dispatches per-entry actions. Verified: `:smarttubetv:compileStstableDebugJavaWithJavac` BUILD SUCCESSFUL, `:common:testStstableDebugUnitTest` BUILD SUCCESSFUL.
 

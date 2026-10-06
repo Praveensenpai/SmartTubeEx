@@ -1,15 +1,12 @@
-# 🌸 SmartTubeEx v32.11 ✨
+# 🌸 SmartTubeEx v32.12 ✨
 
-A player-feel pass: on-screen volume, controls that get out of the way, a position counter, and a cleaner quality picker.
+A focused audio and playback release: filter audio languages to only those actually available for the playing video, eliminating clutter on single-track and multi-language content.
 
 ### 🌟 What's New
 
-- **🔊 Volume Slider On Screen** — changing volume now shows a bar overlay with a mute icon instead of a toast. It fades out on its own after a moment.
-- **👻 Controls Hide While Paused** — the player UI now auto-hides when paused, just like during playback, so a paused frame stays clean.
-- **🔢 Video Counter** — the player shows your position in the current list (e.g. `3 / 12`). It stays hidden for single videos.
-- **🎚 One Row Per Resolution** — the quality list now shows a single row for each resolution (1080p, 720p, …) instead of a separate row for every codec. The active codec is shown right on the row.
-- **🖐 Long-Press To Pick A Codec** — hold a resolution to open codec choices for that resolution only (AV1 / VP9 / AVC). Tapping the row applies the best available codec.
-- **🔐 Signed & Verified** — every APK is signed with the project release keystore, and the build verifies the signature before publishing.
+- **🎙️ Video-Specific Audio Languages** — the in-player audio language selector now only displays audio tracks actually present in the current video (e.g. Original, English, Spanish, Japanese). Hundreds of unavailable device locales are filtered out.
+- **🧹 Clean Player Menu For Single-Track Videos** — if a video only has a single audio language with no alternatives, the audio language menu item is cleanly hidden, keeping the player interface lean.
+- **⚙️ Preserved Global Language Settings** — global preferred audio language configuration remains fully accessible in app settings (*Settings → Player → Audio language*).
 
 ### 📦 Assets
 
@@ -23,5 +20,5 @@ A player-feel pass: on-screen volume, controls that get out of the way, a positi
 ### 🛠 Install
 
 ```bash
-adb install -r SmartTube_stable_32.11_universal.apk
+adb install -r SmartTube_stable_32.12_universal.apk
 ```

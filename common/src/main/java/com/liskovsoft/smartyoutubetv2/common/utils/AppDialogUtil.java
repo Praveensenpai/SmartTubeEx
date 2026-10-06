@@ -346,6 +346,111 @@ public class AppDialogUtil {
         return createAudioLanguageCategory(context, () -> {});
     }
 
+    public static OptionCategory createAudioLanguageCategory(Context context, List<FormatItem> audioFormats, Runnable onSetCallback) {
+        if (context == null || audioFormats == null || audioFormats.isEmpty()) {
+            return null;
+        }
+
+        Map<String, String> availableLanguages = extractAvailableAudioLanguages(audioFormats);
+        boolean hasOriginal = containsOriginalAudioTrack(audioFormats);
+
+        int totalDistinctLanguages = availableLanguages.size() + (hasOriginal ? 1 : 0);
+        if (totalDistinctLanguages <= 1) {
+            return null;
+        }
+
+        PlayerData playerData = PlayerData.instance(context);
+        String title = context.getString(R.string.audio_language);
+        List<OptionItem> options = new ArrayList<>();
+        String currentLang = playerData.getAudioLanguage();
+
+        boolean anyMatched = false;
+        for (String code : availableLanguages.keySet()) {
+            if (isAudioLanguageSelected(code, currentLang)) {
+                anyMatched = true;
+                break;
+            }
+        }
+
+        options.add(UiOptionItem.from(context.getString(R.string.original_lang),
+                optionItem -> {
+                    playerData.setAudioLanguage("");
+                    onSetCallback.run();
+                },
+                currentLang == null || currentLang.isEmpty() || !anyMatched));
+
+        for (Entry<String, String> entry : availableLanguages.entrySet()) {
+            String code = entry.getKey();
+            String name = entry.getValue();
+            options.add(UiOptionItem.from(name,
+                    optionItem -> {
+                        playerData.setAudioLanguage(code);
+                        onSetCallback.run();
+                    },
+                    isAudioLanguageSelected(code, currentLang)));
+        }
+
+        return OptionCategory.from(AUDIO_LANGUAGE_ID, OptionCategory.TYPE_RADIO_LIST, title, options);
+    }
+
+    private static Map<String, String> extractAvailableAudioLanguages(List<FormatItem> audioFormats) {
+        Map<String, String> availableLanguages = new LinkedHashMap<>();
+        for (FormatItem item : audioFormats) {
+            String lang = item != null ? item.getLanguage() : null;
+            if (lang == null || lang.isEmpty() || "und".equalsIgnoreCase(lang) || "original".equalsIgnoreCase(lang)) {
+                continue;
+            }
+
+            String clean = lang.replaceAll("\\s*\\(.*\\)", "").trim();
+            if (clean.isEmpty() || "und".equalsIgnoreCase(clean) || "original".equalsIgnoreCase(clean)) {
+                continue;
+            }
+
+            String key = clean.toLowerCase(Locale.ROOT);
+            if (!availableLanguages.containsKey(key)) {
+                availableLanguages.put(key, buildAudioLanguageDisplayName(clean));
+            }
+        }
+        return availableLanguages;
+    }
+
+    private static boolean containsOriginalAudioTrack(List<FormatItem> audioFormats) {
+        for (FormatItem item : audioFormats) {
+            String lang = item != null ? item.getLanguage() : null;
+            if (lang == null || lang.isEmpty() || "und".equalsIgnoreCase(lang) || "original".equalsIgnoreCase(lang)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static String buildAudioLanguageDisplayName(String langCode) {
+        Locale locale;
+        if (Build.VERSION.SDK_INT >= 21) {
+            locale = Locale.forLanguageTag(langCode);
+        } else {
+            String[] parts = langCode.split("[-_]");
+            locale = parts.length > 1 ? new Locale(parts[0], parts[1]) : new Locale(parts[0]);
+        }
+        String name = locale.getDisplayName();
+        if (name == null || name.isEmpty()) {
+            name = locale.getDisplayLanguage();
+        }
+        if (name == null || name.isEmpty()) {
+            name = langCode;
+        } else if (name.length() > 1) {
+            name = Character.toUpperCase(name.charAt(0)) + name.substring(1);
+        }
+        return name;
+    }
+
+    private static boolean isAudioLanguageSelected(String code, String currentLang) {
+        if (code == null || code.isEmpty() || currentLang == null || currentLang.isEmpty()) {
+            return false;
+        }
+        return Helpers.startsWith(code, currentLang) || Helpers.startsWith(currentLang, code);
+    }
+
     public static OptionCategory createAudioLanguageCategory(Context context, Runnable onSetCallback) {
         PlayerData playerData = PlayerData.instance(context);
         String title = context.getString(R.string.audio_language);
