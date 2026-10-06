@@ -1,12 +1,12 @@
-# 🌸 SmartTubeEx v32.12 ✨
+# 🌸 SmartTubeEx v32.13 ✨
 
-A focused audio and playback release: filter audio languages to only those actually available for the playing video, eliminating clutter on single-track and multi-language content.
+Fast startup video loading optimization: reduced initial playback buffer to 500ms for near-instant video start while maintaining gradual 30s–100s buffer ahead in the background.
 
 ### 🌟 What's New
 
-- **🎙️ Video-Specific Audio Languages** — the in-player audio language selector now only displays audio tracks actually present in the current video (e.g. Original, English, Spanish, Japanese). Hundreds of unavailable device locales are filtered out.
-- **🧹 Clean Player Menu For Single-Track Videos** — if a video only has a single audio language with no alternatives, the audio language menu item is cleanly hidden, keeping the player interface lean.
-- **⚙️ Preserved Global Language Settings** — global preferred audio language configuration remains fully accessible in app settings (*Settings → Player → Audio language*).
+- **⚡ Instant Video Playback Start** — decreased initial buffer threshold (`bufferForPlaybackMs`) from 2,500ms down to 500ms. Playback begins almost immediately without the prolonged spinner wait on initial video click.
+- **🔄 Gradual Background Buffer** — once playback begins, ExoPlayer continues steadily streaming chunks in the background up to the configured 30s–100s limit to ensure rock-solid, stall-free viewing.
+- **⏱️ Rapid Rebuffer Recovery** — shortened post-rebuffer pause threshold (`bufferForPlaybackAfterRebufferMs`) to 2,000ms for quick resumption if network hiccups.
 
 ### 📦 Assets
 
@@ -20,5 +20,5 @@ A focused audio and playback release: filter audio languages to only those actua
 ### 🛠 Install
 
 ```bash
-adb install -r SmartTube_stable_32.12_universal.apk
+adb install -r SmartTube_stable_32.13_universal.apk
 ```
