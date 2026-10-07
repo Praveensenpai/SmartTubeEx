@@ -2,6 +2,6 @@
 <resources>
     <string-array name="update_urls">
         <!-- NOTE: Real urls moved to the flavor's folder -->
-        <!--<item>https://github.com/yuliskov/SmartTubeNext/releases/download/latest/smarttube_beta.json</item>-->
+        <!--<item>https://github.com/Praveensenpai/smarttubeex/releases/latest/download/smarttube_stable2.json</item>-->
     </string-array>
 </resources>

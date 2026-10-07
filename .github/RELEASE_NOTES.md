@@ -1,12 +1,12 @@
-# 🌸 SmartTubeEx v32.13 ✨
+# 🌸 SmartTubeEx v32.14 ✨
 
-Fast startup video loading optimization: reduced initial playback buffer to 500ms for near-instant video start while maintaining gradual 30s–100s buffer ahead in the background.
+Update delivery & release pipeline: SmartTubeEx now ships its own signed update manifests from CI, so in-app update checks point at this repo instead of upstream.
 
 ### 🌟 What's New
 
-- **⚡ Instant Video Playback Start** — decreased initial buffer threshold (`bufferForPlaybackMs`) from 2,500ms down to 500ms. Playback begins almost immediately without the prolonged spinner wait on initial video click.
-- **🔄 Gradual Background Buffer** — once playback begins, ExoPlayer continues steadily streaming chunks in the background up to the configured 30s–100s limit to ensure rock-solid, stall-free viewing.
-- **⏱️ Rapid Rebuffer Recovery** — shortened post-rebuffer pause threshold (`bufferForPlaybackAfterRebufferMs`) to 2,000ms for quick resumption if network hiccups.
+- **🔗 Self-Hosted Updates** — update checks now resolve to the SmartTubeEx release feed (`Praveensenpai/smarttubeex`) instead of the upstream SmartTubeNext URLs.
+- **🤖 Automated Manifests** — the release workflow generates and publishes `smarttube_stable2.json` and `smarttube_stable.json` on every tag, matching the built APKs and changelog.
+- **🧭 Corrected Source Links** — in-app "sources" and "releases" links now point at the SmartTubeEx repository and releases page.
 
 ### 📦 Assets
 
@@ -20,5 +20,5 @@ Fast startup video loading optimization: reduced initial playback buffer to 500m
 ### 🛠 Install
 
 ```bash
-adb install -r SmartTube_stable_32.13_universal.apk
+adb install -r SmartTube_stable_32.14_universal.apk
 ```

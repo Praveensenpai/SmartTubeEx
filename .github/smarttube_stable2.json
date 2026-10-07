@@ -1,0 +1,54 @@
+{
+  "package": {
+    "downloadUrlList": [
+      "https://github.com/Praveensenpai/smarttubeex/releases/download/v32.13/SmartTube_stable_32.13_universal.apk"
+    ],
+    "downloadUrlList_arm64-v8a": [
+      "https://github.com/Praveensenpai/smarttubeex/releases/download/v32.13/SmartTube_stable_32.13_arm64-v8a.apk"
+    ],
+    "downloadUrlList_armeabi-v7a": [
+      "https://github.com/Praveensenpai/smarttubeex/releases/download/v32.13/SmartTube_stable_32.13_armeabi-v7a.apk"
+    ],
+    "downloadUrlList_x86": [
+      "https://github.com/Praveensenpai/smarttubeex/releases/download/v32.13/SmartTube_stable_32.13_x86.apk"
+    ]
+  },
+  "32.13": {
+    "versionCode": 2403,
+    "changelog": [
+      "Instant Video Playback Start — decreased initial buffer threshold (bufferForPlaybackMs) from 2,500ms down to 500ms. Playback begins almost immediately without the prolonged spinner wait on initial video click.",
+      "Gradual Background Buffer — once playback begins, ExoPlayer continues steadily streaming chunks in the background up to the configured 30s–100s limit to ensure rock-solid, stall-free viewing.",
+      "Rapid Rebuffer Recovery — shortened post-rebuffer pause threshold (bufferForPlaybackAfterRebufferMs) to 2,000ms for quick resumption if network hiccups."
+    ]
+  },
+  "32.12": {
+    "versionCode": 2402,
+    "changelog": [
+      "Filter in-player audio languages by stream availability"
+    ]
+  },
+  "32.11": {
+    "versionCode": 2401,
+    "changelog": [
+      "Volume overlay, pause auto-hide, video counter, and grouped quality settings"
+    ]
+  },
+  "32.10": {
+    "versionCode": 2400,
+    "changelog": [
+      "Block channel directly from player playback controls"
+    ]
+  },
+  "32.09": {
+    "versionCode": 2399,
+    "changelog": [
+      "Follow YouTube suggestions from feed rows"
+    ]
+  },
+  "32.08": {
+    "versionCode": 2398,
+    "changelog": [
+      "Silent background update checks and signed CI release pipeline"
+    ]
+  }
+}

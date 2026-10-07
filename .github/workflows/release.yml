@@ -46,6 +46,16 @@ jobs:
           sha256sum *.apk > SHA256SUMS.txt
           cat SHA256SUMS.txt
 
+      - name: Generate Update Manifests
+        run: |
+          python3 .github/scripts/generate_manifest.py \
+            --tag "${{ github.ref_name }}" \
+            --apk-dir "smarttubetv/build/outputs/apk/ststable/release" \
+            --base-manifest ".github/smarttube_stable2.json" \
+            --release-notes ".github/RELEASE_NOTES.md" \
+            --build-gradle "smarttubetv/build.gradle" \
+            --output-dir "smarttubetv/build/outputs/apk/ststable/release"
+
       - name: Verify APK Signing
         run: |
           SDK_ROOT="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
@@ -78,4 +88,6 @@ jobs:
           files: |
             smarttubetv/build/outputs/apk/ststable/release/*.apk
             smarttubetv/build/outputs/apk/ststable/release/SHA256SUMS.txt
+            smarttubetv/build/outputs/apk/ststable/release/smarttube_stable2.json
+            smarttubetv/build/outputs/apk/ststable/release/smarttube_stable.json
           fail_on_unmatched_files: true
