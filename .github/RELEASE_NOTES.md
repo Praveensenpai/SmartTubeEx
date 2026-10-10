@@ -1,12 +1,12 @@
-# 🌸 SmartTubeEx v32.14 ✨
+# 🌸 SmartTubeEx v32.15 ✨
 
-Update delivery & release pipeline: SmartTubeEx now ships its own signed update manifests from CI, so in-app update checks point at this repo instead of upstream.
+Live playback position and total duration are now exposed to the Android media session, so TV companion apps and notifiers can show real progress.
 
 ### 🌟 What's New
 
-- **🔗 Self-Hosted Updates** — update checks now resolve to the SmartTubeEx release feed (`Praveensenpai/smarttubeex`) instead of the upstream SmartTubeNext URLs.
-- **🤖 Automated Manifests** — the release workflow generates and publishes `smarttube_stable2.json` and `smarttube_stable.json` on every tag, matching the built APKs and changelog.
-- **🧭 Corrected Source Links** — in-app "sources" and "releases" links now point at the SmartTubeEx repository and releases page.
+- **⏱ Live Progress in the Media Session** — SmartTube now mirrors `pos=<ms>;dur=<ms>` into the media session metadata, refreshed every second while playing.
+- **📡 Companion App Ready** — external notifiers (e.g. TEREBI) can read accurate elapsed and total time directly from `dumpsys media_session`, which never prints a `duration=` field on its own.
+- **🔋 Light Touch** — a single 1-second handler refreshes playback state and metadata; it is removed on view teardown with no leaks.
 
 ### 📦 Assets
 
@@ -20,5 +20,5 @@ Update delivery & release pipeline: SmartTubeEx now ships its own signed update 
 ### 🛠 Install
 
 ```bash
-adb install -r SmartTube_stable_32.14_universal.apk
+adb install -r SmartTube_stable_32.15_universal.apk
 ```

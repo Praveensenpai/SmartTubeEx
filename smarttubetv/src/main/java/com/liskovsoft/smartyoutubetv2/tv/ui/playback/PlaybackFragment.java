@@ -107,6 +107,7 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
     private static final String TAG = PlaybackFragment.class.getSimpleName();
     private static final String SELECTED_VIDEO_ID = "SelectedVideoId";
     private static final int UPDATE_DELAY_MS = 100;
+    private static final int MEDIA_SESSION_REFRESH_MS = 1_000;
     private static final int SUGGESTIONS_START_INDEX = 1;
     private VideoPlayerGlue mPlayerGlue;
     private SimpleExoPlayer mPlayer;
@@ -126,6 +127,17 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
     private boolean mIsEngineBlocked;
     private MediaSessionCompat mMediaSession;
     private MediaSessionConnector mMediaSessionConnector;
+    private final Handler mMediaSessionHandler = new Handler(Looper.getMainLooper());
+    private final Runnable mMediaSessionRefresher = new Runnable() {
+        @Override
+        public void run() {
+            if (mMediaSessionConnector != null) {
+                mMediaSessionConnector.invalidateMediaSessionPlaybackState();
+                mMediaSessionConnector.invalidateMediaSessionMetadata();
+                mMediaSessionHandler.postDelayed(this, MEDIA_SESSION_REFRESH_MS);
+            }
+        }
+    };
     private DoubleTapPlayerAdapter mDoubleTapPlayerAdapter;
     private YouTubeOverlay mYouTubeOverlay;
     private Boolean mIsControlsShownPreviously;
@@ -432,6 +444,7 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
             mRowsSupportFragment.getBridgeAdapter().getPresenterMapper().clear();
             mRowsSupportFragment = null;
         }
+        mMediaSessionHandler.removeCallbacks(mMediaSessionRefresher);
         if (mMediaSessionConnector != null) {
             mMediaSessionConnector.setPlayer(null);
             mMediaSessionConnector.setControlDispatcher(null);
@@ -656,6 +669,11 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
             metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, Helpers.toString(getVideo().getSecondTitleFull()));
             metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI, getVideo().getCardImageUrl());
             metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, getDurationMs());
+            // NOTE: Machine-readable playback token for external consumers (e.g. TEREBI).
+            // Android's dumpsys media_session never prints a duration= field, so pos/dur are
+            // mirrored into METADATA_KEY_DISPLAY_DESCRIPTION, which dumpsys does expose.
+            metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION,
+                    String.format(Locale.US, "pos=%d;dur=%d", getPositionMs(), getDurationMs()));
 
             return metadataBuilder.build();
         });
@@ -691,6 +709,9 @@ public class PlaybackFragment extends SeekModePlaybackFragment implements Playba
                 return super.dispatchSetPlayWhenReady(player, playWhenReady);
             }
         });
+
+        mMediaSessionHandler.removeCallbacks(mMediaSessionRefresher);
+        mMediaSessionHandler.postDelayed(mMediaSessionRefresher, MEDIA_SESSION_REFRESH_MS);
     }
 
     private void initializePlayerRows() {
