@@ -7,7 +7,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-REPO_NAME = "Praveensenpai/smarttubeex"
+REPO_NAME = "Praveensenpai/SmartTubeEx"
 BASE_URL = f"https://github.com/{REPO_NAME}/releases/download"
 
 
